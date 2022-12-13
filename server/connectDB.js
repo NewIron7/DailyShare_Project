@@ -1,8 +1,16 @@
-import mysql from "mysql"
+import sqlite from "sqlite3";
 
-export const db = mysql.createConnection({
-    host:"localhost",
-    user:"root",
-    password:"root",
-    database:"proto_DailyShare"
-})
+sqlite.verbose();
+
+export const db = new sqlite.Database('dailyShare', (err) => {
+    if (err) {
+      // Cannot open database
+      console.error(err.message)
+      throw err
+    }
+    db.all(`SELECT (username) FROM user`, (err, data) => {
+        if (err) console.log(err);
+        else console.log(data);
+    }); //affichage de tout les utilisateurs
+});
+

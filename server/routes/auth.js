@@ -9,14 +9,14 @@ const router = express.Router();
 router.post('/login', (req, res) => {
     if (req.body.username && req.body.password)
     {
-        const q = "SELECT * FROM users WHERE username = ?";
+        const q = "SELECT * FROM user WHERE username = ?";
 
-        db.query(q, [req.body.username], (err, data) => {
+        db.get(q, [req.body.username], (err, data) => {
             if (err) return res.status(500).json(err);
             if (data.length === 0) return res.status(404).json("Aucun compte pour cet utilisateur");
             const checkPassword = bcryptjs.compareSync(
                 req.body.password,
-                data[0].password
+                data.password
             );
             console.log(data);
             if (!checkPassword) return res.status(400).json("Erreur de mot de passe");
@@ -26,7 +26,7 @@ router.post('/login', (req, res) => {
                 { expiresIn : 60 * 60 }  //en seconde
             );
             const message = "Utilisateur connecte avec succes";
-            return res.json({message, data: req.body.username, token});
+            res.json({message, data: req.body.username, token});
         });
     }
     else

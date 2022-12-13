@@ -10,23 +10,29 @@ router.post('/register', (req, res) => {
         const message = "Username/password non transmit";
         return res.status(401).json({message});
     }
-    const q = "SELECT * FROM users WHERE username = ?";
-    db.query(q, [req.body.username], (err, data) => {
-        if (err) return res.status(500).json(err);
-        if (data.length) return res
-                                    .status(409)
-                                    .json({ message : "Deja un compte avec cet username"});
-        const salt = bcrypjs.genSaltSync(10);
-        const hashedPassword = bcrypjs.hashSync(req.body.password, salt);
-             
-        const qq = "INSERT INTO users (`username`, `password`) VALUE (?)";
-        const values = [req.body.username, hashedPassword];
-        db.query(qq, [values], (err, data) => {
-        if (err) res.status(500).json(err);
-            const message = "Compte cree avec succes"
-            return res.status(200).json({message});
+    db.serialize(() => {
+        const q = "SELECT * FROM user WHERE username = ?;";
+        db.get(q, [req.body.username], (err, data) => {
+            if (err) return res.status(500).json(err);
+            if (data !== undefined) return res
+                                        .status(409)
+                                        .json({ message : "Deja un compte avec cet username"});
+            const salt = bcrypjs.genSaltSync(10);
+            const hashedPassword = bcrypjs.hashSync(req.body.password, salt);
+
+            const q = 'INSERT INTO user (username, mail, password, name) VALUES(?, ?, ?, ?);';
+            const values = [req.body.username, req.body.mail, hashedPassword, req.body.name];
+            console.log(values);
+            db.run(q, values, (err) => {
+                if (err) res.status(500).json(err);
+                else {
+                    const message = "Compte cree avec succes"
+                    res.status(200).json({message}); 
+                }
+            });
         });
     });
+    
 });
 
 export default router; //on export les routes crees
