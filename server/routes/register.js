@@ -19,10 +19,8 @@ router.post('/register', (req, res) => {
                                         .json({ message : "Deja un compte avec cet username"});
             const salt = bcrypjs.genSaltSync(10);
             const hashedPassword = bcrypjs.hashSync(req.body.password, salt);
-
             const q = 'INSERT INTO user (username, mail, password, name) VALUES(?, ?, ?, ?);';
             const values = [req.body.username, req.body.mail, hashedPassword, req.body.name];
-            console.log(values);
             db.run(q, values, (err) => {
                 if (err) res.status(500).json(err);
                 else {
