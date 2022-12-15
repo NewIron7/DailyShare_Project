@@ -7,6 +7,7 @@ import shareRoute from './routes/share.js';
 import actRoute from './routes/act.js';
 import discoverRoute from './routes/discover.js';
 import dayRoute from './routes/day.js';
+import groupRoute from './routes/group.js';
 
 const app = express();
 const port = 3000;
@@ -22,5 +23,6 @@ app.use('/api', shareRoute);
 app.use('/api', actRoute);
 app.use('/api', discoverRoute);
 app.use('/api', dayRoute);
+app.use('/api', groupRoute);
 
 app.listen(port, () => console.log('API is working !'));

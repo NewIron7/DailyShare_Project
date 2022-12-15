@@ -48,17 +48,24 @@ router.put('/discover/:id', authAdmin, (req, res) => {
                     .status(409)
                     .json({ message : "Aucun discover avec cet id"});
         }
-        const text = req.body.text ? req.body.text : data.text;
-        const picture = req.body.picture ? req.body.picture : data.picture;
-        const answer = req.body.answer ? req.body.answer : data.answer;
-        const desc = req.body.desc ? req.body.desc : data.desc;
-        const q = 'UPDATE discover set text = (?), picture = (?), answer = (?), desc = (?) WHERE id = (?);';
-        db.run(q, [text, picture, answer, desc, req.params.id], (err) => {
-            if (err) res.status(500).json(err);
-            else {
-                const message = "Discover modifie avec succes";
-                res.status(200).json({message}); 
-            }
+        const q = 'SELECT id FROM `discover` WHERE text = (?) AND id != (?);';
+        db.get(q, [req.body.text ? req.body.text : "", req.params.id], (err, dataVerif) => {
+            if (err) return res.status(500).json(err);
+            if (dataVerif !== undefined) return res
+                                            .status(409)
+                                            .json({ message : "Deja un discover avec ce text"});
+            const text = req.body.text ? req.body.text : data.text;
+            const picture = req.body.picture ? req.body.picture : data.picture;
+            const answer = req.body.answer ? req.body.answer : data.answer;
+            const desc = req.body.desc ? req.body.desc : data.desc;
+            const q = 'UPDATE discover set text = (?), picture = (?), answer = (?), desc = (?) WHERE id = (?);';
+            db.run(q, [text, picture, answer, desc, req.params.id], (err) => {
+                if (err) res.status(500).json(err);
+                else {
+                    const message = "Discover modifie avec succes";
+                    res.status(200).json({message}); 
+                }
+            });
         });
     });
 })

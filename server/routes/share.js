@@ -48,13 +48,20 @@ router.put('/share/:id', authAdmin, (req, res) => {
                     .status(409)
                     .json({ message : "Aucun share avec cet id"});
         }
-        const q = 'UPDATE share set text = (?) WHERE id = (?);';
-        db.run(q, [req.body.text, req.params.id], (err) => {
-            if (err) res.status(500).json(err);
-            else {
-                const message = "Share modifie avec succes";
-                res.status(200).json({message}); 
-            }
+        const q = 'SELECT id FROM `share` WHERE text = (?) AND id != (?);';
+        db.get(q, [req.body.text ? req.body.text : "", req.params.id], (err, dataVerif) => {
+            if (err) return res.status(500).json(err);
+            if (dataVerif !== undefined) return res
+                                            .status(409)
+                                            .json({ message : "Deja un share avec ce text"});
+            const q = 'UPDATE share set text = (?) WHERE id = (?);';
+            db.run(q, [req.body.text, req.params.id], (err) => {
+                if (err) res.status(500).json(err);
+                else {
+                    const message = "Share modifie avec succes";
+                    res.status(200).json({message}); 
+                }
+            });
         });
     });
 })

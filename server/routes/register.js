@@ -12,7 +12,7 @@ router.post('/user/register', (req, res) => {
     }
     
     const q = 'SELECT id FROM user WHERE username = (?) OR email = (?);';
-    db.get(q, [req.body.username, 'root@mail.net'], (err, data) => {
+    db.get(q, [req.body.username, req.body.email], (err, data) => {
         if (err) return res.status(500).json(err);
         if (data !== undefined) return res
                                         .status(409)

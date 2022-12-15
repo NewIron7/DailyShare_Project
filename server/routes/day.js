@@ -51,18 +51,25 @@ router.put('/day/:id', authAdmin, (req, res) => {
                     .status(409)
                     .json({ message : "Aucun day avec cet id"});
         }
-        const date = req.body.date ? req.body.date : data.date;
-        const share_id = req.body.share_id ? req.body.share_id : data.share_id;
-        const discover_id = req.body.discover_id ? req.body.discover_id : data.discover_id;
-        const act_id = req.body.act_id ? req.body.act_id : data.act_id;
-        const q = 'UPDATE day set date = (?),\
-                share_id = (?), discover_id = (?), act_id = (?) WHERE id = (?);';
-        db.run(q, [date, share_id, discover_id, act_id, req.params.id], (err) => {
-            if (err) res.status(500).json(err);
-            else {
-                const message = "Day modifie avec succes";
-                res.status(200).json({message}); 
-            }
+        const q = 'SELECT id FROM `day` WHERE date = (?) AND id != (?);';
+        db.get(q, [req.body.date ? req.body.date : "", req.params.id], (err, dataVerif) => {
+            if (err) return res.status(500).json(err);
+            if (dataVerif !== undefined) return res
+                                            .status(409)
+                                            .json({ message : "Deja un day a cet date"});
+            const date = req.body.date ? req.body.date : data.date;
+            const share_id = req.body.share_id ? req.body.share_id : data.share_id;
+            const discover_id = req.body.discover_id ? req.body.discover_id : data.discover_id;
+            const act_id = req.body.act_id ? req.body.act_id : data.act_id;
+            const q = 'UPDATE day set date = (?),\
+                    share_id = (?), discover_id = (?), act_id = (?) WHERE id = (?);';
+            db.run(q, [date, share_id, discover_id, act_id, req.params.id], (err) => {
+                if (err) res.status(500).json(err);
+                else {
+                    const message = "Day modifie avec succes";
+                    res.status(200).json({message}); 
+                }
+            });
         });
     });
 })

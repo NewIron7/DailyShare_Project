@@ -48,15 +48,22 @@ router.put('/act/:id', authAdmin, (req, res) => {
                     .status(409)
                     .json({ message : "Aucun act avec cet id"});
         }
-        const text = req.body.text ? req.body.text : data.text;
-        const desc = req.body.desc ? req.body.desc : data.desc;
-        const q = 'UPDATE act set text = (?), desc = (?) WHERE id = (?);';
-        db.run(q, [text, desc, req.params.id], (err) => {
-            if (err) res.status(500).json(err);
-            else {
-                const message = "Act modifie avec succes";
-                res.status(200).json({message}); 
-            }
+        const q = 'SELECT id FROM `act` WHERE text = (?) AND id != (?);';
+        db.get(q, [req.body.text ? req.body.text : "", req.params.id], (err, dataVerif) => {
+            if (err) return res.status(500).json(err);
+            if (dataVerif !== undefined) return res
+                                            .status(409)
+                                            .json({ message : "Deja un act avec ce text"});
+            const text = req.body.text ? req.body.text : data.text;
+            const desc = req.body.desc ? req.body.desc : data.desc;
+            const q = 'UPDATE act set text = (?), desc = (?) WHERE id = (?);';
+            db.run(q, [text, desc, req.params.id], (err) => {
+                if (err) res.status(500).json(err);
+                else {
+                    const message = "Act modifie avec succes";
+                    res.status(200).json({message}); 
+                }
+            });
         });
     });
 })
