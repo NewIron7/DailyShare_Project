@@ -4,10 +4,10 @@ import bcrypjs from "bcryptjs";
 
 const router = express.Router();
 
-router.post('/register', (req, res) => {
-    if (!req.body.username || !req.body.password)
+router.post('/user/register', (req, res) => {
+    if (!req.body.username || !req.body.password || !req.body.email)
     {
-        const message = "Username/password non transmit";
+        const message = "Username/password/email non transmit";
         return res.status(401).json({message});
     }
     

@@ -6,7 +6,7 @@ import { db } from "../connectDB.js";
 
 const router = express.Router();
 
-router.post('/login', (req, res) => {
+router.post('/user/login', (req, res) => {
     if (req.body.username && req.body.password)
     {
         const q = "SELECT * FROM user WHERE username = ?";
