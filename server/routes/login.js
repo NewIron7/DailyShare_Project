@@ -19,13 +19,13 @@ router.post('/user/login', (req, res) => {
                 data.password
             );
             if (!checkPassword) return res.status(400).json("Erreur de mot de passe");
-            const token = jwt.sign(
+            const accessToken = jwt.sign(
                 {username: req.body.username },
                 privateKey,
                 { expiresIn : 60 * 60 }  //en seconde
             );
             const message = "Utilisateur connecte avec succes";
-            res.json({message, data: req.body.username, token});
+            res.json({message, data: req.body.username, accessToken});
         });
     }
     else

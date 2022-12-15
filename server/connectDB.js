@@ -8,9 +8,10 @@ export const db = new sqlite.Database('dailyShare', (err) => {
       console.error(err.message)
       throw err
     }
-    db.all(`SELECT (username) FROM user`, (err, data) => {
-        if (err) console.log(err);
-        else console.log(data);
-    }); //affichage de tout les utilisateurs
+    console.log("DB is working and is connected !")
+    // db.all(`SELECT (username) FROM user`, (err, data) => {
+    //     if (err) console.log(err);
+    //     else console.log(data);
+    // }); //affichage de tout les utilisateurs
 });
 

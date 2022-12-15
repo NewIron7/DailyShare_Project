@@ -55,7 +55,8 @@ router.put('/day/:id', authAdmin, (req, res) => {
         const share_id = req.body.share_id ? req.body.share_id : data.share_id;
         const discover_id = req.body.discover_id ? req.body.discover_id : data.discover_id;
         const act_id = req.body.act_id ? req.body.act_id : data.act_id;
-        const q = 'UPDATE day set date = (?), share_id = (?), discover_id = (?), act_id = (?) WHERE id = (?);';
+        const q = 'UPDATE day set date = (?),\
+                share_id = (?), discover_id = (?), act_id = (?) WHERE id = (?);';
         db.run(q, [date, share_id, discover_id, act_id, req.params.id], (err) => {
             if (err) res.status(500).json(err);
             else {
@@ -95,8 +96,37 @@ router.delete('/day/:id', authAdmin, (req, res) => {
 
 //Permet de recuperer tous les day existant
 router.get('/day', authAdmin, (req, res) => {
-    const q = 'SELECT * FROM day;';
-    db.all(q, (err, data) => {
+    const date = req.query.date;
+    let q = 'SELECT\
+    day.date,\
+    share.text AS "share_text",\
+    discover.text AS "discover_text",\
+    discover.picture AS "discover_picture",\
+    discover.answer AS "discover_answer",\
+    discover.desc AS "discover_desc",\
+    act.text AS "act_text",\
+    act.desc AS "act_desc"\
+    FROM day\
+    INNER JOIN share ON share.id = day.share_id\
+    INNER JOIN discover ON discover.id = day.discover_id\
+    INNER JOIN act ON act.id = day.act_id\
+    ;';
+    if (date) q = 'SELECT\
+    day.date,\
+    share.text AS "share_text",\
+    discover.text AS "discover_text",\
+    discover.picture AS "discover_picture",\
+    discover.answer AS "discover_answer",\
+    discover.desc AS "discover_desc",\
+    act.text AS "act_text",\
+    act.desc AS "act_desc"\
+    FROM day\
+    INNER JOIN share ON share.id = day.share_id\
+    INNER JOIN discover ON discover.id = day.discover_id\
+    INNER JOIN act ON act.id = day.act_id\
+    WHERE day.date = (?)\
+    ;';
+    db.all(q, [date],(err, data) => {
         if (err) return res.status(500).json(err);
         if (data === undefined)
         {
