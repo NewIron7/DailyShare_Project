@@ -15,7 +15,7 @@ router.post('/userGroup', auth, (req, res) => {
     }
     const decodeToken = get_decode_token(req.headers.authorization);
     const q = 'SELECT user_id FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
-    db.get(q, [decodeToken.user.id, req.body.group_id], (err, data) => {
+    db.get(q, [decodeToken.data.user.id, req.body.group_id], (err, data) => {
         if (err) return res.status(500).json(err);
         if (data !== undefined)
         {
@@ -24,7 +24,7 @@ router.post('/userGroup', auth, (req, res) => {
                     .json({ message : "Vous etes deja dans ce groupe"});
         }
         const q = 'INSERT INTO `user_group` (user_id, group_id) VALUES(?, ?);';
-        db.run(q, [decodeToken.user.id, req.body.group_id], (err) => {
+        db.run(q, [decodeToken.data.user.id, req.body.group_id], (err) => {
             if (err) res.status(500).json(err);
             else {
                 const message = "Group rejoins avec succes";
@@ -43,7 +43,7 @@ router.delete('/user_group/:id', auth, (req, res) => {
     }
     const decodeToken = get_decode_token(req.headers.authorization);
     const q = 'SELECT user_id FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
-    db.get(q, [decodeToken.user.id, req.params.id], (err, data) => {
+    db.get(q, [decodeToken.data.user.id, req.params.id], (err, data) => {
         if (err) return res.status(500).json(err);
         if (data === undefined)
         {
@@ -52,7 +52,7 @@ router.delete('/user_group/:id', auth, (req, res) => {
                     .json({ message : "Vous n'etes pas dans ce group"});
         }
         const q = 'DELETE FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
-        db.run(q, [decodeToken.user.id, req.params.id], (err) => {
+        db.run(q, [decodeToken.data.user.id, req.params.id], (err) => {
             if (err) res.status(500).json(err);
             else {
                 const message = "Group quitte avec succes";
@@ -63,9 +63,12 @@ router.delete('/user_group/:id', auth, (req, res) => {
 })
 
 //Permet de recuperer tous les group auquel l'utilisateur appartient
-router.get('/user_group', authAdmin, (req, res) => {
-    const q = 'SELECT * FROM `user_group`;';
-    db.all(q, (err, data) => {
+router.get('/user_group', auth, (req, res) => {
+    const q = 'SELECT `group`.id,`group`.name, `group`.picture FROM user_group\
+        INNER JOIN `group` ON `group`.id = user_group.group_id\
+        WHERE user_group.user_id = (?)';
+    const decodeToken = get_decode_token(req.headers.authorization);
+    db.all(q, [decodeToken.data.user.id], (err, data) => {
         if (err) return res.status(500).json(err);
         if (data === undefined)
         {

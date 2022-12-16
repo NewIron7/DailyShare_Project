@@ -17,8 +17,8 @@ export const auth = (req, res, next) => {
             const message = "Vous n'etes pas correctement connecte";
             return res.status(401).json({message, data: error});
         }
-        const username = decodeToken.username;
-        if (req.body.username && req.body.username !== username)
+        const user = decodeToken?.data?.user;
+        if (JSON.stringify(user) !== JSON.stringify(req.body.user))
         {
             const message = "Le token d'authentification ne vous appartient pas";
             return res.status(401).json({message});
