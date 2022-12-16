@@ -25,8 +25,11 @@ router.post('/group', authAdmin, (req, res) => {
         db.run(q, [req.body.name, req.body.picture], (err) => {
             if (err) res.status(500).json(err);
             else {
-                const message = "Group cree avec succes";
-                res.status(200).json({message}); 
+                const q = 'SELECT * FROM `group` WHERE name = (?);';
+                db.get(q, [req.body.name], (err, data) => {
+                    const message = "Group cree avec succes";
+                    res.status(200).json({message, group : { id: data.id, name: req.body.name, picture: req.body.picture }});
+                });
             }
         });
     });
@@ -34,6 +37,7 @@ router.post('/group', authAdmin, (req, res) => {
 
 //Permet de modifier un group existant a partir de son id
 router.put('/group/:id', authAdmin, (req, res) => {
+    console.log(req);
     if (!req.body.name && !req.body.picture)
     {
         const message = "Les valeurs pour la modifications n'ont \
