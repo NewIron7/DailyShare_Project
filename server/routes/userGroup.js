@@ -2,8 +2,7 @@ import express from 'express';
 import { db } from '../connectDB.js';
 import { auth } from '../middlewares/auth.js'
 import { authAdmin } from '../middlewares/authAdmin.js';
-import jwt from 'jsonwebtoken';
-import { privateKey } from '../privateKey.js';
+import { get_decode_token } from '../utils/token.js';
 
 const router = express.Router();
 
@@ -14,9 +13,7 @@ router.post('/userGroup', auth, (req, res) => {
         const message = "L'id du groupe n'a pas ete transmis";
         return res.status(401).json({message});
     }
-    const authorizationHeader = req.headers.authorization;
-    const token = authorizationHeader.split(' ')[1];
-    const decodeToken = jwt.verify(token, privateKey, (error, decodeToken) => decodeToken);
+    const decodeToken = get_decode_token(req.headers.authorization);
     const q = 'SELECT user_id FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
     db.get(q, [decodeToken.user.id, req.body.group_id], (err, data) => {
         if (err) return res.status(500).json(err);
@@ -37,73 +34,37 @@ router.post('/userGroup', auth, (req, res) => {
     });
 })
 
-//Permet de modifier un group existant a partir de son id
-router.put('/group/:id', authAdmin, (req, res) => {
-    if (!req.body.name && !req.body.picture)
-    {
-        const message = "Les valeurs pour la modifications n'ont \
-                        pas ete correctement transmise";
-        return res.status(401).json({message});
-    }
-    const q = 'SELECT * FROM `group` WHERE id = (?);';
-    db.get(q, [req.params.id], (err, data) => {
-        if (err) return res.status(500).json(err);
-        if (data === undefined)
-        {
-            return res
-                    .status(409)
-                    .json({ message : "Aucun group avec cet id"});
-        }
-        const q = 'SELECT id FROM `group` WHERE name = (?) AND id != (?);';
-        db.get(q, [req.body.name ? req.body.name : "", req.params.id], (err, dataVerif) => {
-            if (err) return res.status(500).json(err);
-            if (dataVerif !== undefined) return res
-                                            .status(409)
-                                            .json({ message : "Deja un group avec ce name"});
-            const name = req.body.name ? req.body.name : data.name;
-            const picture = req.body.picture ? req.body.picture : data.picture;
-            const q = 'UPDATE `group` set name = (?), picture = (?) WHERE id = (?);';
-            db.run(q, [name, picture, req.params.id], (err) => {
-                if (err) res.status(500).json(err);
-                else {
-                    const message = "Group modifie avec succes";
-                    res.status(200).json({message}); 
-                }
-            });                               
-        });
-    });
-})
-
-//Permet de supprimer un group a partir de son id
-router.delete('/group/:id', authAdmin, (req, res) => {
+//Permet de quitter un group
+router.delete('/user_group/:id', auth, (req, res) => {
     if (!req.params.id)
     {
         const message = "id pour le group n'a pas ete transmis";
         return res.status(401).json({message});
     }
-    const q = 'SELECT id FROM `group` WHERE id = (?);';
-    db.get(q, [req.params.id], (err, data) => {
+    const decodeToken = get_decode_token(req.headers.authorization);
+    const q = 'SELECT user_id FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
+    db.get(q, [decodeToken.user.id, req.params.id], (err, data) => {
         if (err) return res.status(500).json(err);
         if (data === undefined)
         {
             return res
                     .status(409)
-                    .json({ message : "Aucun group avec cet id"});
+                    .json({ message : "Vous n'etes pas dans ce group"});
         }
-        const q = 'DELETE FROM `group` WHERE id = (?);';
-        db.run(q, [req.params.id], (err) => {
+        const q = 'DELETE FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
+        db.run(q, [decodeToken.user.id, req.params.id], (err) => {
             if (err) res.status(500).json(err);
             else {
-                const message = "Group supprime avec succes";
+                const message = "Group quitte avec succes";
                 res.status(200).json({message}); 
             }
         });
     });
 })
 
-//Permet de recuperer tous les group existant
-router.get('/group', authAdmin, (req, res) => {
-    const q = 'SELECT * FROM `group`;';
+//Permet de recuperer tous les group auquel l'utilisateur appartient
+router.get('/user_group', authAdmin, (req, res) => {
+    const q = 'SELECT * FROM `user_group`;';
     db.all(q, (err, data) => {
         if (err) return res.status(500).json(err);
         if (data === undefined)
