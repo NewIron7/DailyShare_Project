@@ -62,6 +62,32 @@ router.delete('/user_group/:id', auth, (req, res) => {
     });
 })
 
+//Permet de recuperer tous les membres d'un groupe
+router.get('/user_group/:id', auth, (req, res) => {
+    if (!req.params.id)
+    {
+        const message = "id pour le group n'a pas ete transmis";
+        return res.status(401).json({message});
+    }
+    const q = 'SELECT user_id FROM `user_group` WHERE user_id = (?) AND group_id = (?);';
+    db.get(q, [req.body.user.id, req.params.id], (err, data) => {
+        if (err) return res.status(500).json(err);
+        if (data === undefined)
+        {
+            return res
+                    .status(409)
+                    .json({ message : "Vous n'etes pas dans ce group"});
+        }
+        const q = 'SELECT user.username, user.name, user.picture FROM user_group\
+            INNER JOIN `user` ON `user`.id = user_group.user_id\
+            WHERE user_group.group_id = (?)';
+        db.all(q, [req.params.id], (err, data) => {
+            if (err) res.status(500).json(err);
+            res.status(200).json(data);
+        });
+    });
+})
+
 //Permet de recuperer tous les group auquel l'utilisateur appartient
 router.get('/user_group', auth, (req, res) => {
     const q = 'SELECT `group`.id,`group`.name, `group`.picture FROM user_group\
