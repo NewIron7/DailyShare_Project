@@ -20,7 +20,7 @@ router.post('/user/login', (req, res) => {
             );
             if (!checkPassword) return res.status(400).json("Erreur de mot de passe");
             const { password, ...others } = data;
-            const accessToken = jwt.sign(
+            const accessToken = "Bearer " + jwt.sign(
                 {data: {user : others}},
                 privateKey,
                 { expiresIn : '1y' }  //une annee

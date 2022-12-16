@@ -19,7 +19,7 @@ router.post('/admin/login', (req, res) => {
                 data.password
             );
             if (!checkPassword) return res.status(400).json("Erreur de mot de passe");
-            const accessToken = jwt.sign(
+            const accessToken = "Bearer " + jwt.sign(
                 {username: req.body.username, admin: true},
                 privateKey,
                 { expiresIn : '1y' }  //un an
