@@ -7,7 +7,7 @@ export const auth = (req, res, next) => {
     if (!authorizationHeader)
     {
         const message = "Vous n'etes pas connecte !";
-        res.status(401).json({message});
+        return res.status(401).json({message});
     }
 
     const token = authorizationHeader.split(' ')[1];
