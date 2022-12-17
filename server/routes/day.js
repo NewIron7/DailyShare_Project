@@ -105,6 +105,7 @@ router.delete('/day/:id', authAdmin, (req, res) => {
 router.get('/day', authAdmin, (req, res) => {
     const date = req.query.date;
     let q = 'SELECT\
+    day.id,\
     day.date,\
     share.text AS "share_text",\
     discover.text AS "discover_text",\
@@ -119,6 +120,7 @@ router.get('/day', authAdmin, (req, res) => {
     INNER JOIN act ON act.id = day.act_id\
     ;';
     if (date) q = 'SELECT\
+    day.id,\
     day.date,\
     share.text AS "share_text",\
     discover.text AS "discover_text",\

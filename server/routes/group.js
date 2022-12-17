@@ -6,7 +6,7 @@ import { authAdmin } from '../middlewares/authAdmin.js';
 const router = express.Router();
 
 //Permet de creer un group
-router.post('/group', authAdmin, (req, res) => {
+router.post('/group', auth, (req, res) => {
     if (!req.body.name)
     {
         const message = "Le nom du groupe n'a pas ete transmis";
@@ -36,7 +36,7 @@ router.post('/group', authAdmin, (req, res) => {
 })
 
 //Permet de modifier un group existant a partir de son id
-router.put('/group/:id', authAdmin, (req, res) => {
+router.put('/group/:id', auth, (req, res) => {
     console.log(req);
     if (!req.body.name && !req.body.picture)
     {
@@ -74,7 +74,7 @@ router.put('/group/:id', authAdmin, (req, res) => {
 })
 
 //Permet de supprimer un group a partir de son id
-router.delete('/group/:id', authAdmin, (req, res) => {
+router.delete('/group/:id', auth, (req, res) => {
     if (!req.params.id)
     {
         const message = "id pour le group n'a pas ete transmis";
