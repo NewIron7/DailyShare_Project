@@ -1,0 +1,47 @@
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>DailyShare Admin</title>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<header>
+			<nav>
+				<h1>DailyShare Admin</h1>
+				<div class="right">
+				</div>
+			</nav>
+        </header>
+        <form method="post">
+            <h1>Connexion</h1>
+            
+            <label><b>Nom d'utilisateur</b></label>
+            <input type="text" placeholder="Entrer le nom d'utilisateur" name="username" required />
+
+            <label><b>Mot de passe</b></label>
+            <input type="password" placeholder="Entrer le mot de passe" name="password" required />
+
+            <input type="submit" id='submit' value='LOGIN' onsubmit="verifLogin();" />
+        </form>
+        <script>
+            function verifLogin()
+            {
+                const un = document.loginform.usr.value;
+                const pw = document.loginform.pword.value;
+                const options = {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: `{"username":${un},"password":${pw}}`
+                };
+
+                fetch('http://localhost:3000/api/admin/login', options)
+                                                .then(response => response.json())
+                                                .then(response => alert(response.body.message))
+                                                .catch(err => alert(JSON.stringify(err)));
+            }
+        </script>
+			
+	</body>
+</html>
